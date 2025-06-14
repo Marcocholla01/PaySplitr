@@ -59,7 +59,7 @@ This platform was built for a company that processes daily payments to 100 recip
 
 ## 🌍 Live Demo
 
-🔗 [View Live Platform](https://your-live-link.com)
+🔗 [View Live Platform](https://paysplitr.vercel.app)
 
 ---
 

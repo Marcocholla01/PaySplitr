@@ -113,6 +113,10 @@ export default function SignInPage() {
               </p>
               <p>Admin: admin@company.com / admin123</p>
               <p>Distributor: distributor1@company.com / dist123</p>
+              <q>
+                This is for demonstration purposes only. Please reach out if you
+                wish to build on or customize it
+              </q>
             </div>
           </div>
         </CardContent>

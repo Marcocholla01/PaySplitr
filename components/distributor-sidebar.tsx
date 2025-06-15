@@ -44,6 +44,7 @@ import {
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "./notification-bell";
 
 interface DistributorSidebarProps {
   user: {
@@ -167,19 +168,22 @@ export function DistributorSidebar({ user }: DistributorSidebarProps) {
         <SidebarMenu>
           <SidebarMenuButton>
             <SidebarMenuItem>
-              <div className="flex items-center space-x-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-600">
-                  <Shield className="h-5 w-5 text-white" />
+              <div className="flex items-center justify-between px-2 py-1">
+                <div className="flex items-center space-x-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-600">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">PaySplitr</span>
+                    <Badge
+                      variant="outline"
+                      className="text-xs w-fit mt-1 bg-green-50 text-green-600 border-green-200"
+                    >
+                      Distributor
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">PaySplitr</span>
-                  <Badge
-                    variant="outline"
-                    className="text-xs w-fit mt-1 bg-green-50 text-green-600 border-green-200"
-                  >
-                    Distributor
-                  </Badge>
-                </div>
+                <NotificationBell />
               </div>
             </SidebarMenuItem>
           </SidebarMenuButton>

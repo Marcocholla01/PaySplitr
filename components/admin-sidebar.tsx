@@ -43,6 +43,7 @@ import {
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "./notification-bell";
 
 interface AdminSidebarProps {
   user: {
@@ -165,16 +166,19 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
       <SidebarHeader className="px-4 py-3 border-b">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center space-x-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600">
-                <Shield className="h-5 w-5 text-white" />
+            <div className="flex items-center justify-between px-2 py-1">
+              <div className="flex items-center space-x-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600">
+                  <Shield className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">PaySplitr</span>
+                  <Badge variant="secondary" className="text-xs w-fit mt-1">
+                    Admin Panel
+                  </Badge>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold">PaySplitr</span>
-                <Badge variant="secondary" className="text-xs w-fit mt-1">
-                  Admin Panel
-                </Badge>
-              </div>
+              <NotificationBell />
             </div>
           </SidebarMenuItem>
         </SidebarMenu>

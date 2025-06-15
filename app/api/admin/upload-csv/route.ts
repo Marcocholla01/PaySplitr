@@ -1,6 +1,9 @@
-import { getAuthSession } from "@/lib/auth/utils"
-import { createClient } from "@/lib/supabase"
 import { type NextRequest, NextResponse } from "next/server"
+
+import { getAuthSession } from "@/lib/auth/utils"
+import { emailTemplates, sendEmail } from "@/lib/email"
+import { createNotification, logEmail } from "@/lib/notifications"
+import { createClient } from "@/lib/supabase"
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Get all distributors
     const { data: distributors, error: distributorsError } = await supabase
       .from("users")
-      .select("id, email")
+      .select("id, email, name")
       .eq("role", "distributor")
 
     if (distributorsError || !distributors || distributors.length === 0) {
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
     // Get the inserted records for this specific date
     const { data: insertedRecords, error: fetchError } = await supabase
       .from("payment_records")
-      .select("id")
+      .select("*")
       .eq("payment_date", paymentDate)
 
     if (fetchError || !insertedRecords) {
@@ -104,11 +107,17 @@ export async function POST(request: NextRequest) {
     // Distribute records to distributors (evenly)
     const recordsPerDistributor = Math.ceil(insertedRecords.length / distributors.length)
     const assignments = []
+    const distributorAssignments = new Map()
 
     for (let i = 0; i < distributors.length && i * recordsPerDistributor < insertedRecords.length; i++) {
       const startIndex = i * recordsPerDistributor
       const endIndex = Math.min(startIndex + recordsPerDistributor, insertedRecords.length)
       const distributorRecords = insertedRecords.slice(startIndex, endIndex)
+
+      distributorAssignments.set(distributors[i].id, {
+        distributor: distributors[i],
+        records: distributorRecords,
+      })
 
       for (const record of distributorRecords) {
         assignments.push({
@@ -128,11 +137,62 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to assign records" }, { status: 500 })
     }
 
+    // Send email notifications to distributors
+    for (const [distributorId, assignment] of distributorAssignments) {
+      const { distributor, records: distributorRecords } = assignment
+
+      try {
+        // Create in-app notification
+        await createNotification({
+          userId: distributorId,
+          type: "task_assignment",
+          title: `New Tasks Assigned - ${paymentDate}`,
+          message: `You have been assigned ${distributorRecords.length} payment tasks for ${paymentDate}. Total amount: $${distributorRecords.reduce((sum: any, r: { amount: any }) => sum + r.amount, 0).toLocaleString()}`,
+          data: {
+            taskCount: distributorRecords.length,
+            paymentDate,
+            totalAmount: distributorRecords.reduce((sum: any, r: { amount: any }) => sum + r.amount, 0),
+          },
+        })
+
+        // Send email notification
+        const emailTemplate = emailTemplates.distributorTaskAssignment(
+          distributor.name,
+          distributorRecords.length,
+          paymentDate,
+          distributorRecords,
+        )
+
+        const emailResult = await sendEmail({
+          to: distributor.email,
+          subject: emailTemplate.subject,
+          html: emailTemplate.html,
+          text: emailTemplate.text,
+        })
+
+        // Log email
+        await logEmail({
+          recipientEmail: distributor.email,
+          recipientName: distributor.name,
+          subject: emailTemplate.subject,
+          type: "task_assignment",
+          status: emailResult.success ? "sent" : "failed",
+          messageId: emailResult.messageId,
+          errorMessage: emailResult.error,
+        })
+
+        console.log(`Notification sent to ${distributor.name} (${distributor.email})`)
+      } catch (error) {
+        console.error(`Failed to send notification to ${distributor.name}:`, error)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       recordsProcessed: records.length,
       distributorsAssigned: distributors.length,
       paymentDate: paymentDate,
+      notificationsSent: distributorAssignments.size,
     })
   } catch (error) {
     console.error("Upload error:", error)

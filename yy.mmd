@@ -1,0 +1,43 @@
+classDiagram
+    title Hotspot System Classes
+
+    class User {
+        +id: string
+        +name: string
+        +email: string
+        +sessions: Session[]
+        +selectPackage()
+    }
+
+    class PaymentPackage {
+        +id: string
+        +minutes: number
+        +price: number
+    }
+
+    class Session {
+        +id: string
+        +userId: string
+        +startTime: DateTime
+        +durationMinutes: number
+        +isActive(): boolean
+    }
+
+    class Payment {
+        +id: string
+        +userId: string
+        +amount: number
+        +status: "pending"|"completed"|"failed"
+        +process()
+    }
+
+    class HotspotController {
+        +validateSession(sessionId: string): boolean
+        +grantAccess(macAddress: string)
+        +denyAccess(macAddress: string)
+    }
+
+    User "1" --> "n" Session
+    User "1" --> "n" Payment
+    Payment --> PaymentPackage
+    HotspotController --> Session

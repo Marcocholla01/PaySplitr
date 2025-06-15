@@ -1,10 +1,10 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { getAuthSession } from "@/lib/auth/utils"
 import { createClient } from "@/lib/supabase"
-import { getAuthSession } from "@/lib/auth/utils";
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
   try {
-      const session = await getAuthSession();
+    const session = await getAuthSession()
 
     if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -12,9 +12,14 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get("file") as File
+    const paymentDate = formData.get("date") as string
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
+    }
+
+    if (!paymentDate) {
+      return NextResponse.json({ error: "Payment date is required" }, { status: 400 })
     }
 
     const csvText = await file.text()
@@ -35,6 +40,7 @@ export async function POST(request: NextRequest) {
         amount: Number.parseFloat(amount) || 0,
         bank_code,
         reference,
+        payment_date: paymentDate,
         upload_date: new Date().toISOString(),
         status: "pending",
       }
@@ -46,8 +52,26 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient()
 
-    // Clear existing records for today
-    await supabase.from("payment_records").delete().gte("upload_date", new Date().toISOString().split("T")[0])
+    // Check if records already exist for this date
+    const { data: existingRecords, error: checkError } = await supabase
+      .from("payment_records")
+      .select("id")
+      .eq("payment_date", paymentDate)
+      .limit(1)
+
+    if (checkError) {
+      console.error("Error checking existing records:", checkError)
+      return NextResponse.json({ error: "Failed to check existing records" }, { status: 500 })
+    }
+
+    // If records exist for this date, update them instead of creating new ones
+    if (existingRecords && existingRecords.length > 0) {
+      // Clear existing records for this specific date
+      await supabase.from("payment_records").delete().eq("payment_date", paymentDate)
+
+      // Clear existing assignments for this date
+      await supabase.from("record_assignments").delete().eq("payment_date", paymentDate)
+    }
 
     // Insert new records
     const { error: insertError } = await supabase.from("payment_records").insert(records)
@@ -67,17 +91,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No distributors found" }, { status: 500 })
     }
 
-    // Get the inserted records
+    // Get the inserted records for this specific date
     const { data: insertedRecords, error: fetchError } = await supabase
       .from("payment_records")
       .select("id")
-      .gte("upload_date", new Date().toISOString().split("T")[0])
+      .eq("payment_date", paymentDate)
 
     if (fetchError || !insertedRecords) {
       return NextResponse.json({ error: "Failed to fetch inserted records" }, { status: 500 })
     }
 
-    // Distribute records to distributors (5 each)
+    // Distribute records to distributors (evenly)
     const recordsPerDistributor = Math.ceil(insertedRecords.length / distributors.length)
     const assignments = []
 
@@ -91,12 +115,10 @@ export async function POST(request: NextRequest) {
           record_id: record.id,
           distributor_id: distributors[i].id,
           assigned_date: new Date().toISOString(),
+          payment_date: paymentDate,
         })
       }
     }
-
-    // Clear existing assignments for today
-    await supabase.from("record_assignments").delete().gte("assigned_date", new Date().toISOString().split("T")[0])
 
     // Insert new assignments
     const { error: assignmentError } = await supabase.from("record_assignments").insert(assignments)
@@ -110,6 +132,7 @@ export async function POST(request: NextRequest) {
       success: true,
       recordsProcessed: records.length,
       distributorsAssigned: distributors.length,
+      paymentDate: paymentDate,
     })
   } catch (error) {
     console.error("Upload error:", error)

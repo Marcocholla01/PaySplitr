@@ -1,10 +1,10 @@
-import { getAuthSession } from "@/lib/auth/utils";
-import { createClient } from "@/lib/supabase";
-import { NextResponse } from "next/server";
+import { getAuthSession } from "@/lib/auth/utils"
+import { createClient } from "@/lib/supabase"
+import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-      const session = await getAuthSession();
+    const session = await getAuthSession()
 
     if (!session || session.user.role !== "distributor") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -17,6 +17,7 @@ export async function GET() {
       .from("record_assignments")
       .select(`
         assigned_date,
+        payment_date,
         payment_records (
           id,
           recipient_name,
@@ -25,6 +26,7 @@ export async function GET() {
           bank_code,
           reference,
           status,
+          payment_date,
           upload_date
         )
       `)
@@ -47,6 +49,7 @@ export async function GET() {
         reference: assignment.payment_records.reference,
         status: assignment.payment_records.status,
         assigned_date: assignment.assigned_date,
+        payment_date: assignment.payment_records.payment_date,
       })) || []
 
     return NextResponse.json(transformedRecords)

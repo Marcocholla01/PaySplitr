@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS payment_records (
   amount DECIMAL(10,2) NOT NULL,
   bank_code VARCHAR(50) NOT NULL,
   reference VARCHAR(255) NOT NULL,
+  payment_date DATE NOT NULL,
   status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
   upload_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   completed_date TIMESTAMP WITH TIME ZONE,
@@ -29,11 +30,14 @@ CREATE TABLE IF NOT EXISTS record_assignments (
   record_id UUID NOT NULL REFERENCES payment_records(id) ON DELETE CASCADE,
   distributor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   assigned_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  payment_date DATE NOT NULL,
   UNIQUE(record_id, distributor_id)
 );
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_payment_records_status ON payment_records(status);
+CREATE INDEX IF NOT EXISTS idx_payment_records_payment_date ON payment_records(payment_date);
 CREATE INDEX IF NOT EXISTS idx_payment_records_upload_date ON payment_records(upload_date);
 CREATE INDEX IF NOT EXISTS idx_record_assignments_distributor ON record_assignments(distributor_id);
+CREATE INDEX IF NOT EXISTS idx_record_assignments_payment_date ON record_assignments(payment_date);
 CREATE INDEX IF NOT EXISTS idx_record_assignments_assigned_date ON record_assignments(assigned_date);

@@ -38,7 +38,8 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setError("Invalid credentials. Please try again.");
+        console.log(result?.error);
+        setError(result?.error || "Invalid credentials. Please try again.");
       } else {
         // Redirect based on role - we'll handle this on the server side
         router.push("/");

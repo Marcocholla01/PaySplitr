@@ -9,7 +9,7 @@ cron.schedule("0 9 * * *", async () => {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/cron/check-incomplete-tasks`
+      `http://localhost:3000/api/cron/check-incomplete-tasks`
     );
     const result = await response.json();
 
@@ -26,3 +26,4 @@ cron.schedule("0 9 * * *", async () => {
 });
 
 console.log("Cron job scheduled: Check incomplete tasks daily at 9 AM");
+console.log(process.env.NEXT_PUBLIC_APP_URL);

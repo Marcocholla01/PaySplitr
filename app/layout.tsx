@@ -16,7 +16,22 @@ export const metadata: Metadata = {
   },
   description:
     "Secure platform for distributing payment records to distributors",
-  generator: "v0.dev",
+  keywords: [
+    "PaySplitr",
+    "payment distribution",
+    "distributors",
+    "finance",
+    "automated payouts",
+    "task assignment",
+  ],
+  icons: {
+    icon: "/shield.svg",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  applicationName: "PaySplitr",
+  authors: [{ name: "PaySplitr Team", url: "https://paysplitr.com" }],
+  generator: "Next.js 15",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://paysplitr.com"
   ),
@@ -28,6 +43,19 @@ export const metadata: Metadata = {
     siteName: "PaySplitr",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PaySplitr Dashboard Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Payment Distribution Platform",
+    creator: "@PaySplitr", // change if you have a Twitter handle
   },
   robots: {
     index: true,
@@ -35,15 +63,14 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
       "max-image-preview": "large",
+      "max-video-preview": -1,
       "max-snippet": -1,
     },
   },
-  twitter: {
-    title: "Payment Distribution Platform",
-    card: "summary_large_image",
-  },
+  category: "Finance",
+  themeColor: "#0f172a",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
@@ -52,7 +79,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body className={inter.className}>
         <Providers>
           {children}

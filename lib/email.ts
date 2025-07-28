@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
 
 // Create reusable transporter object using SMTP transport
 // const transporter = nodemailer.createTransport({
@@ -11,42 +11,52 @@ import nodemailer from "nodemailer"
 //   },
 // })
 
-
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "localhost",
   port: Number.parseInt("1025"), // Mailpit default SMTP port
   secure: false, // Mailpit doesn’t use TLS by default
-})
-
+});
 
 export interface EmailOptions {
-  to: string | string[]
-  subject: string
-  html: string
-  text?: string
+  to: string | string[];
+  subject: string;
+  html: string;
+  text?: string;
 }
 
 export async function sendEmail({ to, subject, html, text }: EmailOptions) {
   try {
     const info = await transporter.sendMail({
-      from: `"PaySplitr System" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"PaySplitr System" <${
+        process.env.SMTP_FROM || process.env.SMTP_USER
+      }>`,
       to: Array.isArray(to) ? to.join(", ") : to,
       subject,
       text,
       html,
-    })
+    });
 
-    console.log("Email sent successfully:", info.messageId)
-    return { success: true, messageId: info.messageId }
+    console.log("Email sent successfully:", info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("Failed to send email:", error)
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      console.error("Failed to send email:", error.message);
+      return { success: false, error: error.message };
+    } else {
+      console.error("Failed to send email:", error);
+      return { success: false, error: "An unknown error occurred" };
+    }
   }
 }
 
 // Email Templates
 export const emailTemplates = {
-  distributorTaskAssignment: (distributorName: string, taskCount: number, date: string, records: any[]) => ({
+  distributorTaskAssignment: (
+    distributorName: string,
+    taskCount: number,
+    date: string,
+    records: any[]
+  ) => ({
     subject: `New Payment Tasks Assigned - ${date}`,
     html: `
       <!DOCTYPE html>
@@ -84,7 +94,9 @@ export const emailTemplates = {
                 <ul>
                   <li><strong>Total Tasks:</strong> ${taskCount}</li>
                   <li><strong>Date:</strong> ${date}</li>
-                  <li><strong>Total Amount:</strong> $${records.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}</li>
+                  <li><strong>Total Amount:</strong> $${records
+                    .reduce((sum, r) => sum + r.amount, 0)
+                    .toLocaleString()}</li>
                   <li><strong>Status:</strong> Pending</li>
                 </ul>
               </div>
@@ -97,17 +109,27 @@ export const emailTemplates = {
                     (record) => `
                   <div class="task-item">
                     <strong>${record.recipient_name}</strong><br>
-                    Account: ${record.account_number} | Bank: ${record.bank_code}<br>
+                    Account: ${record.account_number} | Bank: ${
+                      record.bank_code
+                    }<br>
                     Amount: <span class="amount">$${record.amount.toLocaleString()}</span>
                   </div>
-                `,
+                `
                   )
                   .join("")}
-                ${records.length > 5 ? `<div class="task-item"><em>... and ${records.length - 5} more tasks</em></div>` : ""}
+                ${
+                  records.length > 5
+                    ? `<div class="task-item"><em>... and ${
+                        records.length - 5
+                      } more tasks</em></div>`
+                    : ""
+                }
               </div>
 
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/distributor/dashboard" class="btn">
+                <a href="${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }/distributor/dashboard" class="btn">
                   View Tasks in Dashboard
                 </a>
               </div>
@@ -122,7 +144,9 @@ export const emailTemplates = {
         </body>
       </html>
     `,
-    text: `Hello ${distributorName},\n\nYou have been assigned ${taskCount} new payment tasks for ${date}.\n\nPlease log in to your dashboard to view and process these tasks.\n\nTotal Amount: $${records.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}\n\nBest regards,\nPaySplitr System`,
+    text: `Hello ${distributorName},\n\nYou have been assigned ${taskCount} new payment tasks for ${date}.\n\nPlease log in to your dashboard to view and process these tasks.\n\nTotal Amount: $${records
+      .reduce((sum, r) => sum + r.amount, 0)
+      .toLocaleString()}\n\nBest regards,\nPaySplitr System`,
   }),
 
   adminTaskCompletion: (
@@ -130,7 +154,7 @@ export const emailTemplates = {
     distributorEmail: string,
     completedCount: number,
     totalCount: number,
-    date: string,
+    date: string
   ) => ({
     subject: `Task Completion Update - ${distributorName}`,
     html: `
@@ -168,16 +192,23 @@ export const emailTemplates = {
                   <li><strong>Distributor:</strong> ${distributorName} (${distributorEmail})</li>
                   <li><strong>Date:</strong> ${date}</li>
                   <li><strong>Completed:</strong> ${completedCount} of ${totalCount} tasks</li>
-                  <li><strong>Completion Rate:</strong> ${((completedCount / totalCount) * 100).toFixed(1)}%</li>
+                  <li><strong>Completion Rate:</strong> ${(
+                    (completedCount / totalCount) *
+                    100
+                  ).toFixed(1)}%</li>
                 </ul>
                 
                 <div class="progress-bar">
-                  <div class="progress-fill" style="width: ${(completedCount / totalCount) * 100}%"></div>
+                  <div class="progress-fill" style="width: ${
+                    (completedCount / totalCount) * 100
+                  }%"></div>
                 </div>
               </div>
 
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/distributors" class="btn">
+                <a href="${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }/admin/distributors" class="btn">
                   View Distributor Performance
                 </a>
               </div>
@@ -192,14 +223,17 @@ export const emailTemplates = {
         </body>
       </html>
     `,
-    text: `Task Completion Update\n\n${distributorName} has completed ${completedCount} of ${totalCount} tasks for ${date}.\n\nCompletion Rate: ${((completedCount / totalCount) * 100).toFixed(1)}%\n\nBest regards,\nPaySplitr System`,
+    text: `Task Completion Update\n\n${distributorName} has completed ${completedCount} of ${totalCount} tasks for ${date}.\n\nCompletion Rate: ${(
+      (completedCount / totalCount) *
+      100
+    ).toFixed(1)}%\n\nBest regards,\nPaySplitr System`,
   }),
 
   distributorIncompleteReminder: (
     distributorName: string,
     incompleteCount: number,
     date: string,
-    overdueRecords: any[],
+    overdueRecords: any[]
   ) => ({
     subject: `⚠️ Incomplete Tasks Reminder - ${date}`,
     html: `
@@ -242,7 +276,9 @@ export const emailTemplates = {
                 <ul>
                   <li><strong>Incomplete Tasks:</strong> ${incompleteCount}</li>
                   <li><strong>Original Date:</strong> ${date}</li>
-                  <li><strong>Total Amount:</strong> $${overdueRecords.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}</li>
+                  <li><strong>Total Amount:</strong> $${overdueRecords
+                    .reduce((sum, r) => sum + r.amount, 0)
+                    .toLocaleString()}</li>
                   <li><strong>Status:</strong> Overdue</li>
                 </ul>
               </div>
@@ -255,17 +291,27 @@ export const emailTemplates = {
                     (record) => `
                   <div class="overdue-item">
                     <strong>${record.recipient_name}</strong><br>
-                    Account: ${record.account_number} | Bank: ${record.bank_code}<br>
+                    Account: ${record.account_number} | Bank: ${
+                      record.bank_code
+                    }<br>
                     Amount: <span class="amount">$${record.amount.toLocaleString()}</span>
                   </div>
-                `,
+                `
                   )
                   .join("")}
-                ${overdueRecords.length > 5 ? `<div class="overdue-item"><em>... and ${overdueRecords.length - 5} more overdue tasks</em></div>` : ""}
+                ${
+                  overdueRecords.length > 5
+                    ? `<div class="overdue-item"><em>... and ${
+                        overdueRecords.length - 5
+                      } more overdue tasks</em></div>`
+                    : ""
+                }
               </div>
 
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/distributor/payments/pending" class="btn">
+                <a href="${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }/distributor/payments/pending" class="btn">
                   Complete Overdue Tasks Now
                 </a>
               </div>
@@ -280,6 +326,8 @@ export const emailTemplates = {
         </body>
       </html>
     `,
-    text: `URGENT: Incomplete Tasks Reminder\n\nHello ${distributorName},\n\nYou have ${incompleteCount} incomplete tasks from ${date} that require immediate attention.\n\nTotal Amount: $${overdueRecords.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}\n\nPlease log in to your dashboard and complete these overdue tasks immediately.\n\nBest regards,\nPaySplitr System`,
+    text: `URGENT: Incomplete Tasks Reminder\n\nHello ${distributorName},\n\nYou have ${incompleteCount} incomplete tasks from ${date} that require immediate attention.\n\nTotal Amount: $${overdueRecords
+      .reduce((sum, r) => sum + r.amount, 0)
+      .toLocaleString()}\n\nPlease log in to your dashboard and complete these overdue tasks immediately.\n\nBest regards,\nPaySplitr System`,
   }),
-}
+};

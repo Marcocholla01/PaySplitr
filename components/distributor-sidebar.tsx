@@ -166,7 +166,7 @@ export function DistributorSidebar({ user }: DistributorSidebarProps) {
     <Sidebar collapsible="icon" className="bg-background border-r">
       <SidebarHeader className="px-4 py-3 border-b">
         <SidebarMenu>
-          <SidebarMenuButton>
+          <SidebarMenuButton asChild>
             <SidebarMenuItem>
               <div className="flex items-center justify-between px-2 py-1">
                 <div className="flex items-center space-x-3">

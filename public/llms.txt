@@ -1,0 +1,48 @@
+# PaySplitr
+
+> PaySplitr is a secure and user-friendly platform for distributing payment records to task-based distributors. Designed for organizations handling recurring fieldwork, PaySplitr helps manage task assignments, monitor performance, and automate payouts.
+
+## Blog Posts
+
+- [Launching PaySplitr](https://paysplitr.com/blog/launch): Learn how PaySplitr streamlines the task-payment lifecycle for organizations.
+- [Building a Notification System](https://paysplitr.com/blog/notifications): How we built a dual notification system with email and in-app alerts.
+- [Task Completion Insights](https://paysplitr.com/blog/task-completion): A deep dive into how we track and visualize distributor task completion metrics.
+
+## Assets
+
+- [PaySplitr Documentation](https://docs.paysplitr.com): Technical and user documentation.
+- [PaySplitr GitHub](https://github.com/paysplitr/paysplitr): Source code and contributions.
+- [Support Page](https://paysplitr.com/support): For inquiries and assistance.
+- [Discord Community](https://discord.gg/paysplitr): Join the PaySplitr community.
+- [Follow on Twitter](https://twitter.com/paysplitr): Stay up to date with product news.
+
+## Legal
+
+- [Privacy Policy](https://paysplitr.com/privacy): Learn how we handle user data.
+- [Terms of Service](https://paysplitr.com/terms): Terms governing the use of PaySplitr.
+
+## Docs
+
+### Getting Started
+
+- [Platform Overview](https://docs.paysplitr.com/overview): Understand how PaySplitr works.
+- [Setting Up Tasks](https://docs.paysplitr.com/setup-tasks): Guide for uploading and assigning payment records.
+- [Email Configuration](https://docs.paysplitr.com/email-setup): Set up SMTP or Mailpit for notifications.
+
+### Developer
+
+- [API Reference](https://docs.paysplitr.com/api): REST API documentation.
+- [Webhooks](https://docs.paysplitr.com/webhooks): Respond to task status changes in real-time.
+- [Authentication](https://docs.paysplitr.com/auth): JWT-based user login system with roles.
+
+### Guides
+
+- [Managing Distributors](https://docs.paysplitr.com/guides/distributors): Invite, assign tasks, and track performance.
+- [Handling Incomplete Tasks](https://docs.paysplitr.com/guides/cron-reminders): How automated reminders work.
+- [Real-Time Notifications](https://docs.paysplitr.com/guides/notifications): In-app bell + email system.
+
+### Resources
+
+- [Troubleshooting](https://docs.paysplitr.com/troubleshooting): Resolve common issues.
+- [Admin Dashboard Tips](https://docs.paysplitr.com/dashboard-tips): Make the most of your admin view.
+- [Roadmap](https://paysplitr.com/roadmap): Upcoming features and community suggestions.

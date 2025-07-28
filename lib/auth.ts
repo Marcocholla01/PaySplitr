@@ -6,7 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 // Export authOptions for use in other files
 export const authOptions: AuthOptions = {
-   secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -14,31 +14,76 @@ export const authOptions: AuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
+      // async authorize(credentials) {
+      //   if (!credentials?.email || !credentials?.password) return null;
+
+      //   const supabase = createClient();
+      //   const { data: user, error } = await supabase
+      //     .from("users")
+      //     .select("*")
+      //     .eq("email", credentials.email)
+      //     .single();
+
+      //   if (error || !user) return null;
+
+      //   const isPasswordValid = await bcrypt.compare(
+      //     credentials.password,
+      //     user.password_hash
+      //   );
+
+      //   if (!isPasswordValid) return null;
+
+      //   return {
+      //     id: user.id,
+      //     email: user.email,
+      //     name: user.name,
+      //     role: user.role,
+      //   };
+      // },
+
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error("Missing email or password");
+          }
 
-        const supabase = createClient();
-        const { data: user, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("email", credentials.email)
-          .single();
+          const supabase = createClient();
+          const { data: user, error } = await supabase
+            .from("users")
+            .select("*")
+            .eq("email", credentials.email)
+            .single();
 
-        if (error || !user) return null;
+          if (error) {
+            console.error("Supabase error:", error.message);
+            throw new Error(
+              "Service temporarily unavailable. Please try again later."
+            );
+          }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password_hash
-        );
+          if (!user) {
+            throw new Error("Invalid email or password");
+          }
 
-        if (!isPasswordValid) return null;
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password_hash
+          );
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
+          if (!isPasswordValid) {
+            throw new Error("Invalid email or password");
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (err) {
+          console.error("Authorize error:", err);
+          throw new Error("Login failed. Please try again.");
+        }
       },
     }),
   ],
